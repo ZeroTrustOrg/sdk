@@ -1,0 +1,35 @@
+{
+  "name": "@zero-trust-org/accounts",
+  "version": "0.0.1",
+  "description": "@zero-trust-org/accounts library using smart contract accounts",
+  "main": "dist/_cjs/index.js",
+  "module": "dist/_esm/index.js",
+  "types": "dist/_types/index.d.ts",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "^1.0.0",
+    "@size-limit/esbuild-why": "^9.0.0",
+    "@size-limit/preset-small-lib": "^9.0.0",
+    "bun-types": "^1.0.7",
+    "rimraf": "^5.0.1",
+    "size-limit": "^9.0.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
+  },
+  "keywords": [],
+  "author": "ZeroTrustOrg",
+  "scripts": {
+    "build": "bun run clean && bun run build:cjs && bun run build:esm && bun run build:types",
+    "build:cjs": "tsc --project ./tsconfig.json --module commonjs --outDir ./dist/_cjs --removeComments --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./dist/_cjs/package.json",
+    "build:esm": "tsc --project ./tsconfig.json --module es2015 --outDir ./dist/_esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./dist/_esm/package.json",
+    "build:types": "tsc --project ./tsconfig.json --module esnext --declarationDir ./dist/_types --emitDeclarationOnly --declaration --declarationMap",
+    "clean": "rimraf dist/_esm dist/_cjs dist/_types",
+    "format": "biome format . --write",
+    "lint": "biome check .",
+    "lint:fix": "bun run lint --apply"
+  },
+  "peerDependencies": {
+    "permissionless": "^0.0.17",
+    "viem": "^1.21.0"
+  }
+}
