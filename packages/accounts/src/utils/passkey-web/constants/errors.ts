@@ -8,3 +8,10 @@ export enum PASSKEY_ERRORS {
 	CREDENTIAL_RESPONSE_HAS_NO_PUBLIC_KEY = "The provided response is not an attestation response and has no public key",
 	PUBLIC_KEY_CANT_BE_PARSED_AS_CRYPTO_KEY = "Unable to load key, the provided ArrayBuffer isn’t a valid key.",
 }
+
+export class PasskeyError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PasskeyError";
+  }
+}
