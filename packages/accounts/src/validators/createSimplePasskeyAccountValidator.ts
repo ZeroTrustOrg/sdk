@@ -19,16 +19,15 @@ export async function createSimplePasskeyAccountValidator({
     pubKeyY:BigInt(pubKeyY),
     credentialId:credentialId,
     publicKeyAsHex:publicKeyAsHex,
-    async signUserOperation(
-      userOperationHash: `0x${string}`,
-      _validatorData={}
-    ): Promise<`0x${string}`> {
+    
+    async signUserOperation(userOperationHash: `0x${string}`, _validatorData={}): Promise<`0x${string}`> {
       const allowCredentials: PublicKeyCredentialDescriptor[] = [
         {
           id: Passkey.parseBase64url(credentialId),
           type: 'public-key',
         },
       ];
+      
       const {
         authenticatorData,
         clientDataJson,

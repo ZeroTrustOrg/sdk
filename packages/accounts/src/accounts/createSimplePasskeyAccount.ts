@@ -1,10 +1,80 @@
-import{ encodeFunctionData, type Address, type Chain, type Client, type Hex, type Transport, } from "viem"
+import{ encodeFunctionData, type Address, type Chain, type Client, type Hex, type Transport, concatHex, stringToBytes, fromBytes, } from "viem"
 import { getBytecode, getChainId, } from "viem/actions"
-import { getAccountNonce, getUserOperationHash, type UserOperation } from "permissionless"
+import { getAccountNonce, getSenderAddress, getUserOperationHash, type UserOperation } from "permissionless"
 import type { SimplePasskeyAccount, SimplePasskeyAccountValidator } from "../types"
-import { getAccountAddress, getAccountInitCode } from "../utils"
-import { ZEROTRUST_ADDRESSES } from "../constants"
-import { SimplePasskeyAccountExecuteAbi, SimplePasskeyAccountExecuteBatchAbi } from "../abi/SimplePasskeyAccountAbi"
+import { SimplePasskeyAccountExecuteAbi, SimplePasskeyAccountExecuteBatchAbi, createAccountAbi } from "../abi/SimplePasskeyAccountAbi"
+
+/**
+* Get the account initialization code for ZeroTrust smart account with Passkey as signer
+* @param pubKeyX
+* @param pubKeyY
+* @param credentialId
+* @param index
+* @param factoryAddress
+*/
+export const getAccountInitCode = async ({
+    pubKeyX,
+    pubKeyY,
+    credentialId,
+    index = 0n,
+    factoryAddress,
+  }: {
+    pubKeyX:bigint,
+    pubKeyY:bigint,
+    credentialId:string,
+    index: bigint
+    factoryAddress: Address
+  }): Promise<Hex> => {
+    if (!pubKeyX) throw new Error("pubKeyX of account not found")
+    if (!pubKeyY) throw new Error("pubKeyY of account not found")
+    if (!credentialId) throw new Error("credentialId of account not found")
+  
+    // Build the account init code
+    return concatHex([
+        factoryAddress,
+        encodeFunctionData({
+            abi: createAccountAbi,
+            functionName: "createAccount",
+            args: [
+              pubKeyX,
+                        pubKeyY,
+                        index,
+                        fromBytes(stringToBytes(credentialId),'hex'),
+            ]
+        }) as Hex
+    ])
+}
+  
+/**
+ * Get the account counterfactural address
+ * @param param0 
+ * @returns 
+ */
+export const getAccountAddress = async< TTransport extends Transport = Transport, TChain extends Chain | undefined = Chain | undefined > ({ client,
+    factoryAddress,
+    entryPoint,
+    pubKeyX,
+    pubKeyY,
+    credentialId,
+    index = 0n
+}: {
+    client: Client<TTransport, TChain>
+    factoryAddress: Address
+    entryPoint: Address
+    pubKeyX:bigint,
+    pubKeyY:bigint,
+    credentialId:string,
+    index?: bigint,
+}): Promise<Address> => {
+    const initCode = await getAccountInitCode({pubKeyX, pubKeyY, credentialId, index, factoryAddress})
+    console.log(`initCode: ${initCode}`)
+    console.log(`entryPoint: ${entryPoint}`)
+    return getSenderAddress(client, {
+        initCode,
+        entryPoint
+    })
+}
+
 
 /**
 * Build a simple passkey account ,
@@ -14,23 +84,20 @@ import { SimplePasskeyAccountExecuteAbi, SimplePasskeyAccountExecuteBatchAbi } f
 * @param factoryAddress
 * @param index
 */
-export async function createSimplePasskeyAccount<
-  TTransport extends Transport = Transport,
-  TChain extends Chain | undefined = Chain | undefined,
->(
-  client: Client<TTransport, TChain>,
+export async function createSimplePasskeyAccount<TTransport extends Transport>(
+  client: Client<TTransport, Chain>,
   {
       accountValidator,
-      entryPoint = ZEROTRUST_ADDRESSES.ENTRY_POINT_ADDRESS,
-      factoryAddress = ZEROTRUST_ADDRESSES.FACTORY_ADDRESS,
-      index = 0n,
+      entryPoint,
+      factoryAddress,
+      index,
   }: {
       accountValidator: SimplePasskeyAccountValidator
       entryPoint: Address
-      factoryAddress?: Address
-      index?: bigint
+      factoryAddress: Address
+      index: bigint
   }
-): Promise<SimplePasskeyAccount<TTransport, TChain>> {
+): Promise<SimplePasskeyAccount<Transport, Chain>> {
 
   // Helper to generate the init code for the smart account
   const generateInitCode = () =>

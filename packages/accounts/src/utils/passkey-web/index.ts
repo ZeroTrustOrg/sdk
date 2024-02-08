@@ -1,19 +1,18 @@
 import { PASSKEY_ERRORS, PasskeyError } from "./constants/errors.js";
 
-export type PasskeyCredentialResponse = {
-  data: PublicKeyCredential | null;
-  response:
-    | AuthenticatorAttestationResponse
-    | AuthenticatorAssertionResponse
-    | null;
+export type PasskeyCreateCredentialResponse = {
+  publicKeyCredential: PublicKeyCredential ;
+  response:AuthenticatorAttestationResponse;
 };
 
-interface PasskeyStringResponse {
-  data: string | null;
-}
+export type PasskeyGetCredentialResponse = {
+  publicKeyCredential: PublicKeyCredential ;
+  response: AuthenticatorAssertionResponse  ;
+};
 
-export type PasskeyRawIdResponse = PasskeyStringResponse;
-export type PasskeyPublicKeyAsHexResponse = PasskeyStringResponse;
+type PasskeyPublicKeyResponse =  {
+  publicKey: ArrayBuffer;
+}
 
 export type Verification = {
   isValid: boolean;
@@ -33,45 +32,6 @@ export const truncate = (word: string) =>
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class Passkey{
 
-  static getPublicKeyFromAttestationResponse(response: AuthenticatorAttestationResponse): PasskeyStringResponse {
-    if (!response) {
-      throw new PasskeyError(PASSKEY_ERRORS.INVALID_CREDENTIAL_RESPONSE);
-    }
-    const publicKey = response.getPublicKey();
-    if(!publicKey) throw new PasskeyError(PASSKEY_ERRORS.CREDENTIAL_RESPONSE_HAS_NO_PUBLIC_KEY);
-    const publicKeyAsHex = Passkey.buf2hex(publicKey);
-    return { data: publicKeyAsHex };
-  }
-
-  static async get({
-    allowCredentials = [],
-  }: { allowCredentials?: PublicKeyCredentialDescriptor[] } = {}): Promise<
-    PasskeyCredentialResponse
-  > {
-    const randomUUID = crypto.randomUUID();
-    const challenge = Passkey.hex2buf(randomUUID);
-    try {
-      const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
-        challenge,
-        timeout: 60000,
-        allowCredentials,
-      };
-
-      const assertion = (await navigator.credentials.get({
-        publicKey: publicKeyCredentialRequestOptions,
-      })) as PublicKeyCredential;
-
-      return {
-        data: assertion,
-        response: assertion.response as
-          | AuthenticatorAttestationResponse
-          | AuthenticatorAssertionResponse,
-      };
-    } catch (e) {
-      throw new PasskeyError(PASSKEY_ERRORS.UNABLE_TO_RETRIEVE_CREDENTIAL)
-    }
-  }
-
   static async create({
     appName,
     name,
@@ -82,12 +42,13 @@ export class Passkey{
     name: string;
     displayName: string;
     yubikeyOnly?: boolean;
-  }): Promise<PasskeyCredentialResponse> {
+  }): Promise<PasskeyCreateCredentialResponse> {
     if (!navigator.credentials) {
       throw new PasskeyError(PASSKEY_ERRORS.BROWSER_DOES_NOT_SUPPORT_PASSKEY)
     }
+    let credential;
     try {
-      const credential = (await navigator.credentials.create({
+       credential = (await navigator.credentials.create({
         publicKey: Passkey.publicKeyCredentialCreationOptions(
           appName,
           name,
@@ -95,14 +56,58 @@ export class Passkey{
           yubikeyOnly,
         ),
       })) as PublicKeyCredential;
-
-      return {
-        data: credential,
-        response: credential.response as AuthenticatorAttestationResponse,
-      };
+     
     } catch (e) {
       throw new PasskeyError(PASSKEY_ERRORS.USER_REJECTED_CREDENTIAL)
     }
+
+    if(!credential || !credential.response) throw new PasskeyError(PASSKEY_ERRORS.INVALID_CREATE_CREDENTIAL_RESPONSE)
+      
+    return {
+      publicKeyCredential: credential,
+      response: credential.response as AuthenticatorAttestationResponse,
+    };
+  }
+
+  static getPublicKeyFromAttestationResponse(response: AuthenticatorAttestationResponse): PasskeyPublicKeyResponse {
+    if (!response) {
+      throw new PasskeyError(PASSKEY_ERRORS.INVALID_CREDENTIAL_RESPONSE);
+    }
+    const publicKey = response.getPublicKey();
+    if(!publicKey) throw new PasskeyError(PASSKEY_ERRORS.CREDENTIAL_RESPONSE_HAS_NO_PUBLIC_KEY);
+    // const publicKeyAsHex = Passkey.buf2hex(publicKey);
+    return { publicKey: publicKey };
+  }
+
+  static async get({
+    allowCredentials = [],
+  }: { allowCredentials?: PublicKeyCredentialDescriptor[] } = {}): Promise<
+    PasskeyGetCredentialResponse
+  > {
+    const randomUUID = crypto.randomUUID();
+    const challenge = Passkey.hex2buf(randomUUID);
+    let publicKeyCredential:PublicKeyCredential;
+    try {
+      const publicKeyCredentialRequestOptions: PublicKeyCredentialRequestOptions = {
+        challenge,
+        timeout: 60000,
+        allowCredentials,
+      };
+
+      publicKeyCredential = (await navigator.credentials.get({
+        publicKey: publicKeyCredentialRequestOptions,
+      })) as PublicKeyCredential;
+
+    } catch (e) {
+      throw new PasskeyError(PASSKEY_ERRORS.UNABLE_TO_RETRIEVE_CREDENTIAL)
+    }
+
+    if(!publicKeyCredential || !publicKeyCredential.response) throw new PasskeyError(PASSKEY_ERRORS.INVALID_GET_CREDENTIAL_RESPONSE)
+    
+    return {
+      publicKeyCredential: publicKeyCredential,
+      response: publicKeyCredential.response as AuthenticatorAssertionResponse,
+    };
   }
 
   static async importPublicKeyAsCryptoKey(

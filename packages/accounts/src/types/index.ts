@@ -15,12 +15,9 @@ export type UserOperation = {
   signature: Hex
 }
 
-export type SimplePasskeyAccount<
-    transport extends Transport = Transport,
-    chain extends Chain | undefined = Chain | undefined
-> = {
+export type SimplePasskeyAccount<TTransport extends Transport,TChain extends Chain | undefined> = {
     address:`0x${string}`
-    client: Client<transport, chain>
+    client: Client<TTransport, TChain>
     entryPoint: Address
     getNonce: () => Promise<bigint>
     getInitCode: () => Promise<Hex>
@@ -49,9 +46,9 @@ export type PasskeySigner =  {
 }
 
 
-export interface AccountValidator<T> {
-  signUserOperation(userOperationHash: `0x${string}`, validatorData: T): Promise<`0x${string}`>;
+export interface AccountValidator<TValidatorData> {
+  signUserOperation(userOperationHash: `0x${string}`, validatorData: TValidatorData): Promise<`0x${string}`>;
 }
 
 // biome-ignore lint/complexity/noBannedTypes: <explanation>
-export  type SimplePasskeyAccountValidator = PasskeySigner & AccountValidator<{}>
+export type SimplePasskeyAccountValidator = PasskeySigner & AccountValidator<{}>
