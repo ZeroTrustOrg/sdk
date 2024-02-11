@@ -1,4 +1,4 @@
-import { PASSKEY_ERRORS, PasskeyError } from "./constants/errors.js";
+import { PASSKEY_ERRORS, PasskeyError } from "./constants/errors";
 
 export type PasskeyCreateCredentialResponse = {
   publicKeyCredential: PublicKeyCredential ;
@@ -274,6 +274,7 @@ export class Passkey{
     const rawSignature = new Uint8Array([...r, ...s]);
 
     const verified = await crypto.subtle.verify(
+			// eslint-disable-next-line prettier/prettier
 			<EcdsaParams>{ name: "ECDSA", namedCurve: "P-256", hash: { name: "SHA-256" } },
       key,
       rawSignature,
@@ -281,7 +282,7 @@ export class Passkey{
     );
 
     return { isValid: verified, signature: rawSignature, data: signedData };
-  };
+  }
 
   static normalizeSignature( signature: ArrayBuffer): { r: bigint; s: bigint } {
     const usignature = new Uint8Array(signature);

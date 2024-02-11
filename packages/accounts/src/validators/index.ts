@@ -1,1 +1,1 @@
-export * from './createSimplePasskeyAccountValidator'
+export * from "./passkeyToPasskeyAccountValidator";

@@ -1,1 +1,1 @@
-export * from './createSimplePasskeyAccount'
+export * from './validatorToSimplePasskeyAccount'
