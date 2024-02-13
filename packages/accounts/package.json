@@ -1,6 +1,6 @@
 {
   "name": "@zero-trust-org/accounts",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "@zero-trust-org/accounts library using smart contract accounts",
   "main": "dist/_cjs/index.js",
   "module": "dist/_esm/index.js",
@@ -31,6 +31,5 @@
   "peerDependencies": {
     "permissionless": "^0.0.17",
     "viem": "^1.21.0"
-  },
-  "gitHead": "46aee5021f5e3c8ae0dbc67ba43b068ffe8d3932"
+  }
 }
