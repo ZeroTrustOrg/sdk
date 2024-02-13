@@ -225,8 +225,8 @@ export class Passkey{
 
     const authenticatorDataString = `0x${Passkey.buf2hex(authenticatorData)}`;
     const clientDataJSONString = JSON.stringify(obtainedClientDataJSON);
-    const challengeLocation = 23;
-    const responseTypeLocation = 1;
+    const challengeLocation = clientDataJSONString.indexOf('"challenge":');
+    const responseTypeLocation = clientDataJSONString.indexOf('"type":"webauthn.get"');
     const requireUserVerification = false;
     const { r, s } = Passkey.normalizeSignature(signature);
     const rValue = `0x${r.toString(16)}`;
