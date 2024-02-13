@@ -31,5 +31,6 @@
   "peerDependencies": {
     "permissionless": "^0.0.17",
     "viem": "^1.21.0"
-  }
+  },
+  "gitHead": "46aee5021f5e3c8ae0dbc67ba43b068ffe8d3932"
 }
