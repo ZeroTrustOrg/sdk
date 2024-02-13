@@ -1,6 +1,6 @@
 {
   "name": "@zero-trust-org/accounts",
-  "version": "0.0.1",
+  "version": "0.0.3-alpha.0",
   "description": "@zero-trust-org/accounts library using smart contract accounts",
   "main": "dist/_cjs/index.js",
   "module": "dist/_esm/index.js",
