@@ -6,7 +6,6 @@
   "module": "dist/_esm/index.js",
   "types": "dist/_types/index.d.ts",
   "type": "module",
-  "access": "public",
   "devDependencies": {
     "@biomejs/biome": "^1.0.0",
     "@size-limit/esbuild-why": "^9.0.0",
@@ -33,5 +32,5 @@
     "permissionless": "^0.0.17",
     "viem": "^1.21.0"
   },
-  "gitHead": "1c044dc28f5fcaad4ca40a5448e35d1361062ce2"
+  "gitHead": "79cf5f019eebc1eb3c225e943791b25e7143e723"
 }
