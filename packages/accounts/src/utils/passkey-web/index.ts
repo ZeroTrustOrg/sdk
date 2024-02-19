@@ -2,7 +2,7 @@ import { PASSKEY_ERRORS, PasskeyError } from "./constants/errors";
 
 export type PasskeyCreateCredentialResponse = {
   publicKeyCredential: PublicKeyCredential ;
-  response:AuthenticatorAttestationResponse;
+  authenticatorAttestationResponse:AuthenticatorAttestationResponse;
 };
 
 export type PasskeyGetCredentialResponse = {
@@ -65,7 +65,7 @@ export class Passkey{
       
     return {
       publicKeyCredential: credential,
-      response: credential.response as AuthenticatorAttestationResponse,
+      authenticatorAttestationResponse: credential.response as AuthenticatorAttestationResponse,
     };
   }
 
