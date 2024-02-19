@@ -2,11 +2,19 @@
 
 This repository allows users to use SimplePasskeyAccount, a smart contract account where Passkey is a signer for submitting ERC4337 UserOperations.
 
-This repository has two peer dependencies: `permissionless` and `viem`.
+### ZeroTrust smart contract repo
+Smart contracts for accounts [zerotrust-accounts](https://github.com/ZeroTrustOrg/zerotrust-accounts)
+
+### Sample application repo
+
+The sample react application using this repo [zerotrust-starter-kit](https://github.com/ZeroTrustOrg/zerotrust-starter-kit)
+
+## Get Started
 
 To get started with using SimplePasskeyAccount, follow these steps:
 
 ### Install Dependencies
+This repository has two peer dependencies: `permissionless` and `viem`.
 
 ```bash
 npm install @zero-trust-org/accounts permissionless@0.0.17 view@1.21.0
