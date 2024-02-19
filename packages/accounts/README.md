@@ -9,7 +9,7 @@ To get started with using SimplePasskeyAccount, follow these steps:
 ### Install Dependencies
 
 ```bash
-npm install @zero-trust-org/accounts permissionless viem
+npm install @zero-trust-org/accounts permissionless@0.0.17 view@1.21.0
 ```
 
 ### Creating a New Passkey
