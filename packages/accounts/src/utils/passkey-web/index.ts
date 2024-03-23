@@ -178,13 +178,20 @@ export class Passkey{
   static async getXYCoordinateFromCryptoPublicKey(
 		publicKey: CryptoKey,
 	): Promise<[string, string]> {
-    const jwkKey:JsonWebKey = await window.crypto.subtle.exportKey("jwk", publicKey);
-    if (jwkKey?.x && jwkKey.y) {
-      const pubKeyX = `0x${Passkey.buf2hex(Passkey.parseBase64url(jwkKey.x))}`;
-      const pubKeyY = `0x${Passkey.buf2hex(Passkey.parseBase64url(jwkKey.y))}`;
-      return [pubKeyX, pubKeyY];
-    }
-    throw new PasskeyError(PASSKEY_ERRORS.PUBLIC_KEY_CANT_BE_PARSED_AS_CRYPTO_KEY);
+    const rawKey:ArrayBuffer = await window.crypto.subtle.exportKey("raw", publicKey);
+    const rawKeyBuffer = Buffer.from(rawKey)
+
+    // The first byte is 0x04 (uncompressed), followed by x and y coordinates (32 bytes each for P-256)
+    const pubKeyX = rawKeyBuffer.subarray(1, 33).toString("hex")
+    const pubKeyY = rawKeyBuffer.subarray(33).toString("hex")
+    return [pubKeyX, pubKeyY];
+
+    // if (jwkKey?.x && jwkKey.y) {
+    //   const pubKeyX = `0x${Passkey.buf2hex(Passkey.parseBase64url(jwkKey.x))}`;
+    //   const pubKeyY = `0x${Passkey.buf2hex(Passkey.parseBase64url(jwkKey.y))}`;
+    //   return [pubKeyX, pubKeyY];
+    // }
+    // throw new PasskeyError(PASSKEY_ERRORS.PUBLIC_KEY_CANT_BE_PARSED_AS_CRYPTO_KEY);
 	}
 	
   static async getPasskeySignatureData(
